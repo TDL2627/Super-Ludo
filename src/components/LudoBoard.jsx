@@ -57,14 +57,14 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
     const safeEmojiIdx = safeIdx[key];
     const specialType = specialRC[key];
 
-    let bg = "#1c1917";
+    let bg = "#f8f5f0";
     if (hsColor) bg = `${elem(hsColor).dark}55`;
     if (startColor) bg = `${elem(startColor).dark}66`;
-    if (isSafe && !startColor) bg = "#292524";
+    if (isSafe && !startColor) bg = "#ede8dd";
 
     return (
       <g key={key}>
-        <rect x={x} y={y} width={CELL} height={CELL} fill={bg} stroke="#3d3532" strokeWidth="0.6" />
+        <rect x={x} y={y} width={CELL} height={CELL} fill={bg} stroke="#dcd4c8" strokeWidth="0.7" />
         {hsColor && <rect x={x + 1} y={y + 1} width={CELL - 2} height={CELL - 2} fill={elem(hsColor).fill} opacity="0.18" rx="3" />}
         {isSafe && !startColor && !tokens.length && (
           <text x={x + CELL / 2} y={y + CELL / 2} textAnchor="middle" dominantBaseline="central" fontSize="17" style={{ userSelect: "none" }}>
@@ -87,8 +87,8 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
             y={y + 1.5}
             width={CELL - 3}
             height={CELL - 3}
-            fill="rgba(255,241,118,0.12)"
-            stroke="#fff176"
+            fill="rgba(251,191,36,0.14)"
+            stroke="#fbbf24"
             strokeWidth="2.5"
             rx="4"
             style={{ animation: "elemPulse 0.85s ease-in-out infinite" }}
@@ -124,7 +124,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
           </radialGradient>
         </defs>
         <rect x={bx} y={by} width={bsize} height={bsize} fill={`url(#baseGrad-${color})`} rx="8" stroke={e.border} strokeWidth="2.5" />
-        <rect x={bx + 12} y={by + 12} width={bsize - 24} height={bsize - 24} fill="#0f0f0f" rx="6" opacity="0.7" />
+        <rect x={bx + 12} y={by + 12} width={bsize - 24} height={bsize - 24} fill="#faf8f5" rx="6" opacity="0.92" />
         <rect x={bx + 12} y={by + 12} width={bsize - 24} height={bsize - 24} fill="none" rx="6" stroke={e.fill} strokeWidth="1.5" opacity="0.5" />
         <text x={bx + mid} y={by + mid} textAnchor="middle" dominantBaseline="central" fontSize="52" opacity="0.12" style={{ userSelect: "none", pointerEvents: "none" }}>
           {e.emoji}
@@ -148,7 +148,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
           const isM = token && movableTokenIds.includes(`${color}-${i}`);
           return (
             <g key={i}>
-              <circle cx={sx} cy={sy} r={CELL * 0.72} fill="#1a1a1a" stroke={e.dark} strokeWidth="2" />
+              <circle cx={sx} cy={sy} r={CELL * 0.72} fill="#faf8f5" stroke={e.dark} strokeWidth="2" />
               <circle cx={sx} cy={sy} r={CELL * 0.58} fill="none" stroke={e.fill} strokeWidth="1" opacity="0.35" />
               {isM && (
                 <circle
@@ -156,7 +156,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
                   cy={sy}
                   r={CELL * 0.78}
                   fill="none"
-                  stroke="#fff176"
+                  stroke="#fbbf24"
                   strokeWidth="2.5"
                   opacity="0.9"
                   style={{ animation: "elemPulse 0.85s ease-in-out infinite" }}
@@ -185,16 +185,16 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
 
     return (
       <g key="center">
-        <rect x={x} y={y} width={s} height={s} fill="#0a0a0a" stroke="#333" strokeWidth="0.5" />
-        <polygon points={`${x},${y} ${x + s},${y} ${cx},${cy}`} fill={elem("blue").fill} opacity="0.75" />
-        <polygon points={`${x + s},${y} ${x + s},${y + s} ${cx},${cy}`} fill={elem("green").fill} opacity="0.75" />
-        <polygon points={`${x + s},${y + s} ${x},${y + s} ${cx},${cy}`} fill={elem("yellow").fill} opacity="0.75" />
-        <polygon points={`${x},${y + s} ${x},${y} ${cx},${cy}`} fill={elem("red").fill} opacity="0.75" />
+        <rect x={x} y={y} width={s} height={s} fill="#f5f0e8" stroke="#dcd4c8" strokeWidth="0.7" />
+        <polygon points={`${x},${y} ${x + s},${y} ${cx},${cy}`} fill={elem("blue").fill} opacity="0.42" />
+        <polygon points={`${x + s},${y} ${x + s},${y + s} ${cx},${cy}`} fill={elem("green").fill} opacity="0.42" />
+        <polygon points={`${x + s},${y + s} ${x},${y + s} ${cx},${cy}`} fill={elem("yellow").fill} opacity="0.42" />
+        <polygon points={`${x},${y + s} ${x},${y} ${cx},${cy}`} fill={elem("red").fill} opacity="0.42" />
         <text x={cx} y={y + mid * 0.45} textAnchor="middle" dominantBaseline="central" fontSize="11">💧</text>
         <text x={x + s - mid * 0.45} y={cy} textAnchor="middle" dominantBaseline="central" fontSize="11">🌪️</text>
         <text x={cx} y={y + s - mid * 0.45} textAnchor="middle" dominantBaseline="central" fontSize="11">🪨</text>
         <text x={x + mid * 0.45} y={cy} textAnchor="middle" dominantBaseline="central" fontSize="11">🔥</text>
-        <circle cx={cx} cy={cy} r={mid * 0.38} fill="#0f0f0f" stroke="#555" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={mid * 0.38} fill="#faf8f5" stroke="#c4bbb0" strokeWidth="1" />
         <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" fontSize="24">🌐</text>
         {homeTokens.map((t, i) => {
           const offsets = [[-11, -11], [11, -11], [-11, 11], [11, 11]];
@@ -208,10 +208,10 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
   function renderGrid() {
     const lines = [];
     for (let r = 0; r <= 15; r += 1) {
-      lines.push(<line key={`h${r}`} x1={0} y1={r * CELL} x2={BOARD} y2={r * CELL} stroke="#2a2520" strokeWidth="0.5" />);
+      lines.push(<line key={`h${r}`} x1={0} y1={r * CELL} x2={BOARD} y2={r * CELL} stroke="#e5ddd4" strokeWidth="0.65" />);
     }
     for (let c = 0; c <= 15; c += 1) {
-      lines.push(<line key={`v${c}`} x1={c * CELL} y1={0} x2={c * CELL} y2={BOARD} stroke="#2a2520" strokeWidth="0.5" />);
+      lines.push(<line key={`v${c}`} x1={c * CELL} y1={0} x2={c * CELL} y2={BOARD} stroke="#e5ddd4" strokeWidth="0.65" />);
     }
     return <g>{lines}</g>;
   }
@@ -262,7 +262,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
         maxWidth: "min(96vw,96vh,600px)",
         margin: "0 auto",
         borderRadius: 12,
-        boxShadow: "0 0 0 3px #555, 0 0 0 5px #222, 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(249,115,22,0.1)",
+        boxShadow: "0 0 0 1px #e2ddd4, 0 12px 40px rgba(62,47,35,0.08)",
       }}
     >
       <defs>
@@ -271,8 +271,8 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
           @keyframes elemSpin  { from{transform-origin:50px 50px;transform:rotate(0deg)} to{transform:rotate(360deg)} }
         `}</style>
         <pattern id="darkBoard" width="6" height="6" patternUnits="userSpaceOnUse">
-          <rect width="6" height="6" fill="#1a1614" />
-          <rect x="0" y="0" width="3" height="3" fill="#1c1917" opacity="0.6" />
+          <rect width="6" height="6" fill="#f6f2ec" />
+          <rect x="0" y="0" width="3" height="3" fill="#efe9e2" opacity="0.85" />
         </pattern>
         <filter id="glow">
           <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -308,7 +308,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
       ))}
       {renderGrid()}
       {renderCenter()}
-      <rect x="1.5" y="1.5" width={BOARD - 3} height={BOARD - 3} fill="none" rx="10" stroke="#555" strokeWidth="3" />
+      <rect x="1.5" y="1.5" width={BOARD - 3} height={BOARD - 3} fill="none" rx="10" stroke="#d4c9bc" strokeWidth="1.5" />
     </svg>
   );
 }

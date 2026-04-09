@@ -72,7 +72,7 @@ export default function GameScreen({ players, onRestart }) {
             whiteSpace: "nowrap",
           }}
         >
-          ⚡ ELEMENTAL LUDO
+          ⚡ SUPER LUDO
         </span>
         <button
           onClick={onRestart}
