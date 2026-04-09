@@ -1,4 +1,4 @@
-import { BOARD, CELL, COLORS, HOME_STRETCHES, MAIN_PATH, SAFE_CELL_EMOJI, SAFE_SPOTS, START_POS } from "../game/constants";
+import { BOARD, CELL, COLORS, HOME_STRETCHES, MAIN_PATH, SAFE_CELL_EMOJI, SAFE_SPOTS, SPECIAL_TILE_BY_POS, START_POS } from "../game/constants";
 import { elem, getCellRC } from "../game/utils";
 import ElementPawn from "./ElementPawn";
 
@@ -39,6 +39,11 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
   Object.entries(START_POS).forEach(([color, idx]) => {
     startRC[`${MAIN_PATH[idx][0]}-${MAIN_PATH[idx][1]}`] = color;
   });
+  const specialRC = {};
+  Object.entries(SPECIAL_TILE_BY_POS).forEach(([idx, tileType]) => {
+    const [r, c] = MAIN_PATH[idx];
+    specialRC[`${r}-${c}`] = tileType;
+  });
 
   function renderPathCell(row, col) {
     const key = `${row}-${col}`;
@@ -50,6 +55,7 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
     const startColor = startRC[key];
     const movable = tokens.some((t) => movableTokenIds.includes(`${t.color}-${t.id}`));
     const safeEmojiIdx = safeIdx[key];
+    const specialType = specialRC[key];
 
     let bg = "#1c1917";
     if (hsColor) bg = `${elem(hsColor).dark}55`;
@@ -70,6 +76,11 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
             {elem(startColor).emoji}
           </text>
         )}
+        {specialType && !tokens.length && (
+          <text x={x + CELL / 2} y={y + CELL / 2} textAnchor="middle" dominantBaseline="central" fontSize="14" style={{ userSelect: "none" }}>
+            {specialType === "death" ? "☠" : specialType === "respawn" ? "↺" : specialType === "plus2" ? "+6" : "-6"}
+          </text>
+        )}
         {movable && (
           <rect
             x={x + 1.5}
@@ -83,34 +94,6 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
             style={{ animation: "elemPulse 0.85s ease-in-out infinite" }}
           />
         )}
-        {tokens.map((t, i) => {
-          const n = tokens.length;
-          const offs =
-            n === 1
-              ? [[0, 0]]
-              : n === 2
-                ? [[-8, 0], [8, 0]]
-                : n === 3
-                  ? [[-8, -5], [8, -5], [0, 7]]
-                  : [[-7, -7], [7, -7], [-7, 7], [7, 7]];
-          const [ox, oy] = offs[i] || [0, 0];
-          const isM = movableTokenIds.includes(`${t.color}-${t.id}`);
-          return (
-            <ElementPawn
-              key={`${t.color}-${t.id}`}
-              x={x + CELL / 2 + ox}
-              y={y + CELL / 2 + oy}
-              size={n > 2 ? 15 : 19}
-              color={t.color}
-              glow={isM}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (isM) onTokenClick(t);
-              }}
-              clickable={isM}
-            />
-          );
-        })}
       </g>
     );
   }
@@ -241,6 +224,34 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
     }
   }
 
+  const movingTokens = [];
+  Object.values(cellMap).forEach((tokens) => {
+    const n = tokens.length;
+    const offsets =
+      n === 1
+        ? [[0, 0]]
+        : n === 2
+          ? [[-8, 0], [8, 0]]
+          : n === 3
+            ? [[-8, -5], [8, -5], [0, 7]]
+            : [[-7, -7], [7, -7], [-7, 7], [7, 7]];
+
+    tokens.forEach((token, i) => {
+      const rc = getCellRC(token);
+      if (!rc) return;
+      const [row, col] = rc;
+      const [ox, oy] = offsets[i] || [0, 0];
+      const isMovable = movableTokenIds.includes(`${token.color}-${token.id}`);
+      movingTokens.push({
+        token,
+        x: col * CELL + CELL / 2 + ox,
+        y: row * CELL + CELL / 2 + oy,
+        size: n > 2 ? 15 : 19,
+        isMovable,
+      });
+    });
+  });
+
   return (
     <svg
       viewBox={`0 0 ${BOARD} ${BOARD}`}
@@ -275,6 +286,26 @@ export default function LudoBoard({ allTokens, onTokenClick, movableTokenIds }) 
       <rect width={BOARD} height={BOARD} fill="url(#darkBoard)" rx="10" />
       {COLORS.map((color) => renderBase(color))}
       {allCells}
+      {movingTokens.map((item) => (
+        <g
+          key={`${item.token.color}-${item.token.id}`}
+          transform={`translate(${item.x}, ${item.y})`}
+          style={{ transition: "transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1)" }}
+        >
+          <ElementPawn
+            x={0}
+            y={0}
+            size={item.size}
+            color={item.token.color}
+            glow={item.isMovable}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (item.isMovable) onTokenClick(item.token);
+            }}
+            clickable={item.isMovable}
+          />
+        </g>
+      ))}
       {renderGrid()}
       {renderCenter()}
       <rect x="1.5" y="1.5" width={BOARD - 3} height={BOARD - 3} fill="none" rx="10" stroke="#555" strokeWidth="3" />

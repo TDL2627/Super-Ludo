@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { COLORS, START_POS } from "../game/constants";
+import { COLORS, SPECIAL_TILE_BY_POS, START_POS } from "../game/constants";
 import { createInitialTokens, elem, getAbsolutePos, getRelativePos, isAtSafeSpot } from "../game/utils";
 
 export default function useGameLogic(players) {
@@ -12,7 +12,23 @@ export default function useGameLogic(players) {
   const [movableTokenIds, setMovableTokenIds] = useState([]);
   const [winner, setWinner] = useState(null);
   const [message, setMessage] = useState("🌍 Roll to awaken the elements!");
+  const [specialToast, setSpecialToast] = useState(null);
   const botRef = useRef(null);
+  const toastRef = useRef(null);
+
+  const showSpecialToast = useCallback((type, text) => {
+    const iconMap = { death: "☠", respawn: "↺", plus2: "+6", minus2: "-6" };
+    setSpecialToast({
+      id: `${Date.now()}-${Math.random()}`,
+      type,
+      text,
+      icon: iconMap[type] || "✨",
+    });
+    if (toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(() => {
+      setSpecialToast(null);
+    }, 1700);
+  }, []);
 
   const nextTurn = useCallback((currentColor, gotSix) => {
     if (gotSix) {
@@ -129,6 +145,89 @@ export default function useGameLogic(players) {
         }
       }
 
+      const applyCaptureAtPosition = (movingColor, absPos) => {
+        let didCapture = false;
+        if (isAtSafeSpot(absPos)) return didCapture;
+        COLORS.forEach((color) => {
+          if (color === movingColor || !players[color]) return;
+          next[color].forEach((ot) => {
+            if (ot.state === "active" && ot.absPos === absPos) {
+              ot.state = "base";
+              ot.absPos = null;
+              ot.relPos = null;
+              didCapture = true;
+              setMessage(`${elem(movingColor).emoji} ${players[movingColor]?.name} captured ${elem(color).emoji} ${players[color]?.name}!`);
+            }
+          });
+        });
+        return didCapture;
+      };
+
+      const moveActiveBy = (movingToken, delta) => {
+        if (movingToken.state !== "active") return;
+        const rel = getRelativePos(movingToken.color, movingToken.absPos);
+        const nextRel = rel + delta;
+        if (nextRel < 0) {
+          movingToken.absPos = getAbsolutePos(movingToken.color, 0);
+          movingToken.relPos = 0;
+          return;
+        }
+        if (nextRel >= 52) {
+          const hp = nextRel - 52;
+          movingToken.homeStretchPos = Math.min(hp, 5);
+          movingToken.state = hp >= 5 ? "home" : "homestretch";
+          movingToken.absPos = null;
+          movingToken.relPos = null;
+          return;
+        }
+        movingToken.absPos = getAbsolutePos(movingToken.color, nextRel);
+        movingToken.relPos = nextRel;
+      };
+
+      if (t.state === "active") {
+        const tileType = SPECIAL_TILE_BY_POS[t.absPos];
+        if (tileType === "death") {
+          t.state = "base";
+          t.absPos = null;
+          t.relPos = null;
+          setMessage(`${elem(token.color).emoji} ${players[token.color]?.name} hit a death tile and went back to base.`);
+          showSpecialToast("death", "Death tile! Pawn sent to base");
+        }
+        if (tileType === "respawn") {
+          const respawnToken = next[token.color].find((item) => item.state === "base");
+          if (respawnToken) {
+            respawnToken.state = "active";
+            respawnToken.absPos = START_POS[token.color];
+            respawnToken.relPos = 0;
+            const gotRespawnCapture = applyCaptureAtPosition(token.color, respawnToken.absPos);
+            if (gotRespawnCapture) captured = true;
+            setMessage(`${elem(token.color).emoji} ${players[token.color]?.name} respawned a pawn from base.`);
+            showSpecialToast("respawn", "Respawn tile! One pawn returned");
+          }
+        }
+        if (tileType === "plus2") {
+          moveActiveBy(t, 6);
+          if (t.state === "active") {
+            const gotPlusCapture = applyCaptureAtPosition(token.color, t.absPos);
+            if (gotPlusCapture) captured = true;
+          } else if (t.state === "home") {
+            movedHome = true;
+            gotSix = false;
+          }
+          setMessage(`${elem(token.color).emoji} ${players[token.color]?.name} got +6 bonus move.`);
+          showSpecialToast("plus2", "+6 tile! Bonus forward move");
+        }
+        if (tileType === "minus2") {
+          moveActiveBy(t, -6);
+          if (t.state === "active") {
+            const gotMinusCapture = applyCaptureAtPosition(token.color, t.absPos);
+            if (gotMinusCapture) captured = true;
+          }
+          setMessage(`${elem(token.color).emoji} ${players[token.color]?.name} got -6 move penalty.`);
+          showSpecialToast("minus2", "-6 tile! Step back");
+        }
+      }
+
       const allHome = next[token.color].every((item) => item.state === "home");
       if (allHome) {
         setWinner(token.color);
@@ -189,5 +288,11 @@ export default function useGameLogic(players) {
     return () => clearTimeout(botRef.current);
   }, [diceRolled, movableTokenIds, currentTurn, tokens, diceValue, players, winner, moveToken]);
 
-  return { tokens, currentTurn, diceValue, diceRolled, rolling, movableTokenIds, winner, message, rollDice, moveToken };
+  useEffect(() => {
+    return () => {
+      if (toastRef.current) clearTimeout(toastRef.current);
+    };
+  }, []);
+
+  return { tokens, currentTurn, diceValue, diceRolled, rolling, movableTokenIds, winner, message, specialToast, rollDice, moveToken };
 }

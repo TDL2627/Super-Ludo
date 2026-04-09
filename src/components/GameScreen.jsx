@@ -7,7 +7,7 @@ import { elem } from "../game/utils";
 
 export default function GameScreen({ players, onRestart }) {
   const playerColors = Object.keys(players);
-  const { tokens, currentTurn, diceValue, diceRolled, rolling, movableTokenIds, winner, message, rollDice, moveToken } = useGameLogic(players);
+  const { tokens, currentTurn, diceValue, diceRolled, rolling, movableTokenIds, winner, message, specialToast, rollDice, moveToken } = useGameLogic(players);
   const canRoll = !diceRolled && !rolling && !winner && !players[currentTurn]?.isBot;
   const windowWidth = useWindowWidth();
   const isDesktop = windowWidth >= 900;
@@ -42,6 +42,12 @@ export default function GameScreen({ players, onRestart }) {
       <style>{`
         @keyframes elemPulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
         @keyframes elemSpin  { from{transform-origin:50px 50px;transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes toastInOut {
+          0% { opacity: 0; transform: translate(-50%, 20px) scale(0.95); }
+          15% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+          85% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+          100% { opacity: 0; transform: translate(-50%, -8px) scale(0.98); }
+        }
       `}</style>
 
       <div
@@ -126,6 +132,35 @@ export default function GameScreen({ players, onRestart }) {
         );
       })()}
 
+      {specialToast && (
+        <div
+          key={specialToast.id}
+          style={{
+            position: "fixed",
+            left: "50%",
+            top: isDesktop ? 72 : 60,
+            transform: "translateX(-50%)",
+            zIndex: 120,
+            background: "rgba(8,8,8,0.9)",
+            color: "white",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: 12,
+            padding: "10px 14px",
+            fontSize: 13,
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 10px 24px rgba(0,0,0,0.5)",
+            animation: "toastInOut 1.7s ease forwards",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontSize: 15 }}>{specialToast.icon}</span>
+          <span>{specialToast.text}</span>
+        </div>
+      )}
+
       {isDesktop ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 8px 52px", gap: 8, maxWidth: 1100, margin: "0 auto", width: "100%" }}>
           <div
@@ -165,7 +200,7 @@ export default function GameScreen({ players, onRestart }) {
           </div>
 
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
-            {[["🔥💧🌪️🪨", "Safe spots"], ["🏁", "Start"], ["🌐", "Home"], ["✨", "Movable"]].map(([icon, label]) => (
+            {[["🔥💧🌪️🪨", "Safe spots"], ["🏁", "Start"], ["🌐", "Home"], ["✨", "Movable"], ["☠", "Death"], ["↺", "Respawn"], ["+6", "Boost"], ["-6", "Slow"]].map(([icon, label]) => (
               <div key={label} style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
                 <span>{icon}</span>
                 <span>{label}</span>

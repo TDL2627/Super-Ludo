@@ -99,6 +99,20 @@ export const START_POS = { red: 1, blue: 14, green: 27, yellow: 40 };
 export const SAFE_SPOTS = new Set([1, 9, 14, 22, 27, 35, 40, 48]);
 export const SAFE_CELL_EMOJI = ["🔥", "💧", "🌪️", "🪨", "🔥", "💧", "🌪️", "🪨"];
 
+export const SPECIAL_TILE_GROUPS = {
+  death: [11, 37],
+  respawn: [24, 50],
+  plus2: [17, 43],
+  minus2: [4, 30],
+};
+
+export const SPECIAL_TILE_BY_POS = Object.entries(SPECIAL_TILE_GROUPS).reduce((acc, [type, positions]) => {
+  positions.forEach((pos) => {
+    acc[pos] = type;
+  });
+  return acc;
+}, {});
+
 export const DICE_DOTS = {
   1: [[50, 50]],
   2: [[28, 28], [72, 72]],
