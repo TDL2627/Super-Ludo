@@ -57,8 +57,7 @@ export default function IntroPage({ onStart }) {
               WebkitTextFillColor: "transparent",
             }}
           >
-            LUDO
-          </h1>
+            SUPER LUDO          </h1>
           <p style={{ color: "rgba(255,255,255,0.4)", letterSpacing: 5, fontSize: 10, textTransform: "uppercase" }}>Elements Edition</p>
         </div>
 
